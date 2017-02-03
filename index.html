@@ -4,28 +4,95 @@
         <title> HANDLEBARS </title>
         <script src="handlebars-v4.0.5.js"></script>
         <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/3.6.8/firebase.js"></script>
+
     </head>
 
     <body>
 
-        <!---->
-        <script id="entry-template" type="text/x-handlebars-template">
-            <div class="entry">
-                <h1>{{title}}</h1>
-                <div class="body">
-                    {{body}}
-                </div>
-            </div>
-        </script>
+        <form action="">
+            <label for="prenom">Prénom</label>
+            <input type="text" name="prenom" id="prenom"> </br>
 
-        <script>
-            var source   = $("#entry-template").html();
-            var template = Handlebars.compile(source);
+            <label for="age"> Age</label>
+            <input type="number" name="age" id="age"> </br>
 
-            var context = {title: "My New Post", body: "This is my first post!"};
-            var html    = template(context);
-        </script>
+            <input type="submit" value="OK" name="submit" id="submit">
+        </form>
 
     </body>
+
+    <script id="entry-template" type="text/x-handlebars-template">
+        <div class="entry">
+            <div class="body">
+                <ul>
+                    {{#each this}}
+                    <li>{{perso}}</li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    </script>
+
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyAf5fZnbA7RBpBR4hhFG7FF5JCQf19hvh4",
+            authDomain: "the-best-project-ever-40707.firebaseapp.com",
+            databaseURL: "https://the-best-project-ever-40707.firebaseio.com",
+            storageBucket: "the-best-project-ever-40707.appspot.com",
+            messagingSenderId: "53147112547"
+        };
+        firebase.initializeApp(config);
+
+        function writeUserData(userId,name, age) {
+            firebase.database().ref('users/' + userId).set({
+                userId: userId,
+                username: name,
+                age: age
+            });
+        }
+
+        $('#submit').on('click',function () {
+            var name = $('#prenom').val();
+            var age = $('#age').val();
+            var userId = Math.floor((Math.random() * 1000000) + 0);
+
+            alert(userId);
+            writeUserData(userId, name, age);
+        });
+
+        var personnages = []
+
+
+        Handlebars.registerHelper('perso', function() {
+            var age = Handlebars.escapeExpression(this.age),
+                username = Handlebars.escapeExpression(this.username);
+
+            return new Handlebars.SafeString(
+                "je suis "+username+" j'ai "+age
+            );
+        });
+
+        var source   = $("#entry-template").html();
+        var template = Handlebars.compile(source);
+
+        var wwww = firebase.database().ref('users');
+        wwww.on('value',function (snapchot) {
+            for(var item in snapchot.val()){
+                var perso = snapchot.val()[item];
+                personnages.push(perso);
+            }
+
+            console.log(personnages);
+            var html    = template(personnages);
+            console.log(html);
+            $('body').append(html);
+        });
+
+
+
+    </script>
+
 
 </html>
